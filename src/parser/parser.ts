@@ -42,7 +42,7 @@ import type { ParseResult, AssetSummary } from "../types.ts";
 
 // ── Package index resolver ────────────────────────────────────────────────────
 
-function resolvePackageIndex(
+export function resolvePackageIndex(
   imports: FObjectImport[],
   exports: FObjectExport[],
   names: string[],
@@ -59,7 +59,7 @@ function resolvePackageIndex(
 
 // ── Names table ───────────────────────────────────────────────────────────────
 
-function parseNamesTable(r: BinaryReader, h: PackageFileSummaryData): string[] {
+export function parseNamesTable(r: BinaryReader, h: PackageFileSummaryData): string[] {
   const names: string[] = [];
   if (h.nameCount <= 0 || h.nameOffset <= 0) return names;
 
@@ -84,7 +84,7 @@ function parseNamesTable(r: BinaryReader, h: PackageFileSummaryData): string[] {
 
 // ── Imports table ─────────────────────────────────────────────────────────────
 
-function parseImportsTable(
+export function parseImportsTable(
   r: BinaryReader,
   h: PackageFileSummaryData,
   names: string[],
@@ -106,7 +106,7 @@ function parseImportsTable(
         r.readInt32("Class Name Number");
         const outerIndex      = r.readInt32("Outer Index");
         const objectNameIdx   = r.readInt32("Object Name");
-        r.readInt32("Object Name Number");
+        const objectNameNumber = r.readInt32("Object Name Number"); // kept: the FName instance number, see types.ts
 
         // Editor-only: PackageName (FName = 2 × int32) since fileVersionUE4 >= 520
         if (h.fileVersionUE4 >= UE4_NON_OUTER_PACKAGE_IMPORT) {
@@ -124,6 +124,7 @@ function parseImportsTable(
           className:    classNameIdx,
           outerIndex,
           objectName:   objectNameIdx,
+          objectNameNumber,
         };
         imports.push(imp);
         return `${resolveName(names, classNameIdx)} ${resolveName(names, objectNameIdx)}`;
@@ -136,7 +137,7 @@ function parseImportsTable(
 
 // ── Exports table ─────────────────────────────────────────────────────────────
 
-function parseExportsTable(
+export function parseExportsTable(
   r: BinaryReader,
   h: PackageFileSummaryData,
   names: string[],
@@ -164,7 +165,7 @@ function parseExportsTable(
           ? r.readInt32("Template Index") : 0;
         const outerIndex  = r.readInt32("Outer Index");
         const objectNameIdx = r.readInt32("Object Name");
-        r.readInt32("Object Name Number");
+        const objectNameNumber = r.readInt32("Object Name Number"); // kept: the FName instance number, see types.ts
         const objectFlags = r.readUint32("Object Flags");
         r.setLastDisplay(flagsStr(objectFlags, EObjectFlags));
 
@@ -223,6 +224,7 @@ function parseExportsTable(
         const exp: FObjectExport = {
           classIndex, superIndex, templateIndex, outerIndex,
           objectName: objectNameIdx,
+          objectNameNumber,
           objectFlags, serialSize, serialOffset,
           forcedExport, notForClient, notForServer,
           packageGuid: packageGuid ?? { a: 0, b: 0, c: 0, d: 0 },
@@ -255,7 +257,7 @@ function parseExportsTable(
  * searchable names, preload dependencies, data resources, and Verse cells.
  * Returns the soft object paths array (needed by metadata parsing).
  */
-function parseIndexTables(
+export function parseIndexTables(
   r: BinaryReader,
   h: PackageFileSummaryData,
   names: string[],
@@ -413,7 +415,7 @@ function parseIndexTables(
  * gatherable text data, import type hierarchies, thumbnail table, asset registry data,
  * world tile info, exports footer tag, package trailer.
  */
-function parseOpaqueBlobs(
+export function parseOpaqueBlobs(
   r: BinaryReader,
   h: PackageFileSummaryData,
   names: string[],
@@ -630,7 +632,7 @@ function parseOpaqueBlobs(
 
 // ── Metadata ──────────────────────────────────────────────────────────────────
 
-function parseMetadata(
+export function parseMetadata(
   r: BinaryReader,
   h: PackageFileSummaryData,
   names: string[],
@@ -688,7 +690,7 @@ function parseMetadata(
  * native header bytes (if any), tagged properties, native tail bytes (if any).
  * Falls back to an opaque blob if script offset bounds are unavailable.
  */
-function parseGenericExport(
+export function parseGenericExport(
   r: BinaryReader,
   exp: FObjectExport,
   cls: string,
