@@ -1,3 +1,18 @@
+# UAsset Viewer — lorepit fork
+
+**This is a fork of [UAsset Viewer](https://github.com/1danielcoelho/uassets) by Daniel Coelho
+(MIT).** The upstream history is kept in full, and the original licence is unchanged in
+[LICENSE](LICENSE). See [NOTICE.md](NOTICE.md) for the credit, and [CHANGES.md](CHANGES.md) for every
+way this fork differs from upstream: three small parser changes that let a caller parse a package from
+partial reads, each also offered upstream as a pull request.
+
+[lorepit](https://lorepit.com) vendors the parser from this repository to inspect Unreal packages in
+its web preview, wiki and CLI. Changes that are not lorepit-specific are offered back upstream.
+
+The upstream README follows.
+
+---
+
 # UAsset Viewer
 
 A fully client-side browser tool for inspecting Unreal Engine `.uasset` and `.umap` files.
